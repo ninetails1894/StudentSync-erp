@@ -30,7 +30,10 @@ app.get('/', (req, res) => {
   res.json({ message: 'StudentSync ERP Server is running!' })
 })
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+})
   .then(() => {
     console.log('MongoDB connected successfully')
     app.listen(process.env.PORT || 5000, () => {
