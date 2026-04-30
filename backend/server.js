@@ -10,7 +10,7 @@ const grievanceRoutes = require('./routes/grievances')
 
 const app = express()
 
-// Allow ALL origins completely
+// CORS — allow everything
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
@@ -22,7 +22,6 @@ app.use((req, res, next) => {
 })
 
 app.use(cors())
-
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
@@ -118,22 +117,23 @@ app.get('/seed-data', async (req, res) => {
   }
 })
 
-// Ping self every 14 minutes to prevent Render spin-down
-setInterval(() => {
-  const https = require('https')
-  https.get('https://studentsync-backend.onrender.com/', () => {
-    console.log('Keep-alive ping sent')
-  }).on('error', () => {})
-}, 14 * 60 * 1000)
-
+// Keep alive — prevents Render free tier spin-down
 mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 10000,
   socketTimeoutMS: 45000,
 })
   .then(() => {
     console.log('MongoDB connected successfully')
-    app.listen(process.env.PORT || 5000, () => {
-      console.log(`Server running on port ${process.env.PORT || 5000}`)
+    const PORT = process.env.PORT || 5000
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`)
+      // Ping self every 14 minutes
+      setInterval(() => {
+        const https = require('https')
+        https.get(`https://studentsync-backend.onrender.com/`, () => {
+          console.log('Keep-alive ping sent')
+        }).on('error', () => {})
+      }, 14 * 60 * 1000)
     })
   })
   .catch((err) => {
