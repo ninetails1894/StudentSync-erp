@@ -118,6 +118,14 @@ app.get('/seed-data', async (req, res) => {
   }
 })
 
+// Ping self every 14 minutes to prevent Render spin-down
+setInterval(() => {
+  const https = require('https')
+  https.get('https://studentsync-backend.onrender.com/', () => {
+    console.log('Keep-alive ping sent')
+  }).on('error', () => {})
+}, 14 * 60 * 1000)
+
 mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 10000,
   socketTimeoutMS: 45000,
